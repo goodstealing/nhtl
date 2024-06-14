@@ -10,8 +10,6 @@ namespace nhtl
 {
     internal class CreateHandler
     {
-
-
         public static void CreateFile()
         {
             Console.Clear();

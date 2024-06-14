@@ -19,6 +19,7 @@ namespace nhtl
                 { ConsoleKey.N, CreateHandler.CreateFile },
             };
 
+
             Console.ForegroundColor = ConsoleColor.DarkRed;
             Console.WriteLine(OpenHandler.asciiArt);
             Console.ResetColor();

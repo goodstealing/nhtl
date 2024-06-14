@@ -5,28 +5,31 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NAudio.Wave;
+
 
 namespace nhtl
 {
     internal class OpenHandler
     {
-        public static string fileName;
-        public static string fileNameWithoutExtension;
-        public static string fileExtension;
+        public static string ?fileName;
+        public static string ?fileNameWithoutExtension;
+        public static string ?fileExtension;
+        public const string? asciiArt = "\r\n███╗   ██╗██╗  ██╗████████╗██╗     \r\n████╗  ██║██║  ██║╚══██╔══╝██║     \r\n██╔██╗ ██║███████║   ██║   ██║     \r\n██║╚██╗██║██╔══██║   ██║   ██║     \r\n██║ ╚████║██║  ██║   ██║   ███████╗\r\n╚═╝  ╚═══╝╚═╝  ╚═╝   ╚══════╝";
 
-        public static void OpenFile()
+        public async static void OpenFile()
         {
             Console.Clear();
             Console.CursorVisible = true;
 
-            fileName = GetFileName();
+            fileName = await GetFileNameAsync();
             fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
             fileExtension = Path.GetExtension(fileName);
 
             if (!File.Exists(fileName))
             {
                 Console.Clear();
-                AnsiConsole.MarkupInterpolated($"Файл [green]{fileName}[/] не найден.");
+                AnsiConsole.MarkupInterpolated($"Файл [green]{fileName}[/] не найден.\n");
                 Program.ShowMainMenu();
                 return;
             }
@@ -37,27 +40,61 @@ namespace nhtl
             ShowEditMenu(fileName, lines);
         }
 
-        public static string GetFileName()
+        public static async Task<string> GetFileNameAsync()
         {
-            Console.Write("Введите имя файла/путь для открытия: ");
-            string? fileName = Console.ReadLine();
+            string? fileName;
+
+            do
+            {
+                Console.Write("Введите имя файла/путь для открытия: ");
+                fileName = Console.ReadLine();
+
+                if (string.IsNullOrEmpty(fileName))
+                {
+                    Console.Clear();
+                    AnsiConsole.MarkupInterpolated($"LOG: [red]Ошибка! Имя файла не может быть null или пустым.[/] \n");
+                    await PlayErrorSoundAsync("bib.wav"); // Воспроизведение звука ошибки
+                    AnsiConsole.MarkupInterpolated($"LOG: Пожалуйста, введите имя файла заново.\n");
+                    await PlayErrorSoundAsync("bib.wav"); // Воспроизведение звука ошибки
+                }
+            }
+            while (string.IsNullOrEmpty(fileName));
 
             return Path.IsPathRooted(fileName)
                 ? fileName
                 : Path.Combine(Directory.GetCurrentDirectory(), fileName);
         }
 
-        public static string GetFileExtension(string fileName)
+        public static async Task PlayErrorSoundAsync(string filePath)
         {
-            return Path.GetFileNameWithoutExtension(fileName);
+            if (File.Exists(filePath))
+            {
+                await Task.Run(() =>
+                {
+                    using (var audioFile = new AudioFileReader(filePath))
+                    using (var outputDevice = new WaveOutEvent())
+                    {
+                        outputDevice.Init(audioFile);
+                        outputDevice.Play();
+                        while (outputDevice.PlaybackState == PlaybackState.Playing)
+                        {
+                            System.Threading.Thread.Sleep(100);
+                        }
+                    }
+                });
+            }
+            else
+            {
+                Console.WriteLine($"Файл звука не найден: {filePath}");
+            }
         }
+
+        public static string GetFileExtension(string? fileName) => Path.GetFileNameWithoutExtension(fileName)!;
 
         static void PreviewFileInfo(string fileName, string[] lines, int count)
         {
             Console.Clear();
-            Console.WriteLine($"Имя файла -> {Path.GetFileNameWithoutExtension(fileName)}{Path.GetExtension(fileName)} < - Расширение файла");
-
-            Console.WriteLine($"Предпросмотр файла: {Path.GetFileNameWithoutExtension(fileName)} ");
+            AnsiConsole.MarkupInterpolated($"Предпросмотр файла -> [green]{fileNameWithoutExtension}[/][red]{fileExtension}[/] <- Расширение файла\n");
             Console.WriteLine("══════════════════════════════════");
             for (int i = 0; i < Math.Min(lines.Length, count); i++)
             {
@@ -68,6 +105,8 @@ namespace nhtl
 
         public static void ShowEditMenu(string fileName, string[] lines)
         {
+            ArgumentNullException.ThrowIfNull(lines);
+
             Dictionary<ConsoleKey, Action> keyActions = new()
             {
                 { ConsoleKey.E, () => EditHandler.EditFile(fileName) },
@@ -107,26 +146,18 @@ namespace nhtl
                 if (File.Exists(fileName))
                 {
                     File.Delete(fileName);
-                    AnsiConsole.MarkupInterpolated($"Файл [green]{fileNameWithoutExtension}[/] успешно удалён по пути: [red]{fileName}[/].\n");
+                    AnsiConsole.MarkupInterpolated($"LOG: Файл [green]{fileNameWithoutExtension}[/] успешно удалён по пути: [red]{fileName}[/].\n");
                 }
                 else
                 {
-                    AnsiConsole.MarkupInterpolated($"Файл [green]{fileNameWithoutExtension}[/] по пути: [red]{fileName}[/] не найден.\n");
+                    AnsiConsole.MarkupInterpolated($"LOG: Файл [green]{fileNameWithoutExtension}[/] по пути: [red]{fileName}[/] не найден.\n");
                 }
             }
             catch (Exception ex)
             {
-                AnsiConsole.MarkupInterpolated($"Произошла ошибка при удалении файла [green]{fileNameWithoutExtension}[/]: {ex.Message}.\n");
+                AnsiConsole.MarkupInterpolated($"LOG: [red]Произошла ошибка при удалении файла[/] [green]{fileNameWithoutExtension}[/]: [red]{ex.Message}[/].\n");
             }
             Program.ShowMainMenu();
         }
-
-        public static string asciiArt = @"
-███╗   ██╗██╗  ██╗████████╗██╗     
-████╗  ██║██║  ██║╚══██╔══╝██║     
-██╔██╗ ██║███████║   ██║   ██║     
-██║╚██╗██║██╔══██║   ██║   ██║     
-██║ ╚████║██║  ██║   ██║   ███████╗
-╚═╝  ╚═══╝╚═╝  ╚═╝   ╚══════╝";
     }
 }
