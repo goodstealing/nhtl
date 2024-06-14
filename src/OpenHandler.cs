@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Spectre.Console;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,17 +10,23 @@ namespace nhtl
 {
     internal class OpenHandler
     {
+        public static string fileName;
+        public static string fileNameWithoutExtension;
+        public static string fileExtension;
+
         public static void OpenFile()
         {
             Console.Clear();
             Console.CursorVisible = true;
 
-            string fileName = GetFileName();
+            fileName = GetFileName();
+            fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
+            fileExtension = Path.GetExtension(fileName);
 
             if (!File.Exists(fileName))
             {
                 Console.Clear();
-                Console.WriteLine($"Файл '{fileName}' не найден.");
+                AnsiConsole.MarkupInterpolated($"Файл [green]{fileName}[/] не найден.");
                 Program.ShowMainMenu();
                 return;
             }
@@ -33,22 +40,18 @@ namespace nhtl
         public static string GetFileName()
         {
             Console.Write("Введите имя файла/путь для открытия: ");
-            string ?fileName = Console.ReadLine();
+            string? fileName = Console.ReadLine();
 
             return Path.IsPathRooted(fileName)
-                ?fileName
-                :Path.Combine(Directory.GetCurrentDirectory(), fileName);
+                ? fileName
+                : Path.Combine(Directory.GetCurrentDirectory(), fileName);
         }
 
-        // Возвращает строку для расширения 
         public static string GetFileExtension(string fileName)
         {
             return Path.GetFileNameWithoutExtension(fileName);
         }
 
-
-
-        // Предпросмотр содержимого файла
         static void PreviewFileInfo(string fileName, string[] lines, int count)
         {
             Console.Clear();
@@ -68,7 +71,7 @@ namespace nhtl
             Dictionary<ConsoleKey, Action> keyActions = new()
             {
                 { ConsoleKey.E, () => EditHandler.EditFile(fileName) },
-                { ConsoleKey.R, CreateHandler.CreateFile },
+                { ConsoleKey.R, () => DeleteFile(fileName) },
                 { ConsoleKey.Z, Program.ShowMainMenu },
             };
 
@@ -87,34 +90,35 @@ namespace nhtl
 
                 if ((keyInfo.Modifiers & ConsoleModifiers.Control) != 0)
                 {
-                    switch (keyInfo.Key)
+                    if (keyActions.TryGetValue(keyInfo.Key, out var action))
                     {
-                        case ConsoleKey.E:
-                            Console.WriteLine("Редактирование файла");
-                            EditHandler.EditFile(fileName);
-                            break;
-                        case ConsoleKey.R:
-                            Console.WriteLine("Удаление файла");
-                            break;
-                        case ConsoleKey.Z:
-                            Console.Clear();
-                            Program.ShowMainMenu();
-                            break;
-                        default:
-                            break; // Обработка неизвестных клавиш Ctrl
+                        action();
+                        break;
                     }
                 }
             }
         }
 
-        static void EditFile(string fileName, string[] lines)
+        public static void DeleteFile(string fileName)
         {
-            // ...
-        }
-
-        static void SaveFile(string fileName, string[] lines)
-        {
-            // ...
+            Console.Clear();
+            try
+            {
+                if (File.Exists(fileName))
+                {
+                    File.Delete(fileName);
+                    AnsiConsole.MarkupInterpolated($"Файл [green]{fileNameWithoutExtension}[/] успешно удалён по пути: [red]{fileName}[/].\n");
+                }
+                else
+                {
+                    AnsiConsole.MarkupInterpolated($"Файл [green]{fileNameWithoutExtension}[/] по пути: [red]{fileName}[/] не найден.\n");
+                }
+            }
+            catch (Exception ex)
+            {
+                AnsiConsole.MarkupInterpolated($"Произошла ошибка при удалении файла [green]{fileNameWithoutExtension}[/]: {ex.Message}.\n");
+            }
+            Program.ShowMainMenu();
         }
 
         public static string asciiArt = @"
@@ -123,6 +127,6 @@ namespace nhtl
 ██╔██╗ ██║███████║   ██║   ██║     
 ██║╚██╗██║██╔══██║   ██║   ██║     
 ██║ ╚████║██║  ██║   ██║   ███████╗
-╚═╝  ╚═══╝╚═╝  ╚═╝   ╚═╝   ╚══════╝";
+╚═╝  ╚═══╝╚═╝  ╚═╝   ╚══════╝";
     }
 }

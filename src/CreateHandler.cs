@@ -11,6 +11,7 @@ namespace nhtl
     internal class CreateHandler
     {
 
+
         public static void CreateFile()
         {
             Console.Clear();
@@ -31,7 +32,6 @@ namespace nhtl
 
             TextBuffer textBuffer = new();
             string inputText = textBuffer.StartReading();
-            //Console.WriteLine(); // Переход на новую строку после нажатия Ctrl+E
 
             string filePath;
             do

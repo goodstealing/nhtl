@@ -29,7 +29,7 @@ namespace nhtl
             Console.WriteLine("├───────────────────────────────┤");
             Console.WriteLine("| Ctrl + N | Создать новый файл |");
             Console.WriteLine("├───────────────────────────────┤");
-            Console.WriteLine("| Ctrl + C | Выход              |");
+            Console.WriteLine("| Ctrl + C | Выход              |"); 
             Console.WriteLine("└───────────────────────────────┘");
 
             while (true)
