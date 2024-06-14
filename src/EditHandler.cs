@@ -8,13 +8,14 @@ namespace nhtl
 {
     internal class EditHandler
     {
-        public static void EditFile(string filePath)
+
+        public static void EditFile(string fileName)
         {
             Console.Clear();
-            Console.WriteLine($"Редактирование файла: {filePath}\n");
+            Console.WriteLine($"Редактирование файла: {Path.GetFileNameWithoutExtension(fileName)}{Path.GetExtension(fileName)}\n");
 
             // Читаем содержимое файла
-            string content = File.ReadAllText(filePath);
+            string content = File.ReadAllText(fileName);
 
             // Отображаем содержимое файла
             Console.WriteLine("Содержимое файла:");
@@ -66,11 +67,13 @@ namespace nhtl
                         break;
                 }
             }
+            string[] lines = File.ReadAllLines(fileName);
 
             // Сохраняем изменения в файле
-            File.WriteAllText(filePath, input);
-
-            Console.WriteLine("\nФайл успешно сохранен.");
+            File.WriteAllText(fileName, input);
+            Console.Clear();
+            Console.WriteLine($"\nФайл {Path.GetFileNameWithoutExtension(fileName)}{Path.GetExtension(fileName)} успешно сохранен.");
+            OpenHandler.ShowEditMenu(fileName, lines);
         }
     }
 

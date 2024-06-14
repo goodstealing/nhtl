@@ -30,7 +30,7 @@ namespace nhtl
             ShowEditMenu(fileName, lines);
         }
 
-        static string GetFileName()
+        public static string GetFileName()
         {
             Console.Write("Введите имя файла/путь для открытия: ");
             string ?fileName = Console.ReadLine();
@@ -40,12 +40,21 @@ namespace nhtl
                 :Path.Combine(Directory.GetCurrentDirectory(), fileName);
         }
 
+        // Возвращает строку для расширения 
+        public static string GetFileExtension(string fileName)
+        {
+            return Path.GetFileNameWithoutExtension(fileName);
+        }
+
+
+
+        // Предпросмотр содержимого файла
         static void PreviewFileInfo(string fileName, string[] lines, int count)
         {
             Console.Clear();
-            Console.WriteLine($"Имя файла -> {fileName} <- Расширение файла");
+            Console.WriteLine($"Имя файла -> {Path.GetFileNameWithoutExtension(fileName)}{Path.GetExtension(fileName)} < - Расширение файла");
 
-            Console.WriteLine($"Предпросмотр файла: {Path.GetFileName(fileName)} ");
+            Console.WriteLine($"Предпросмотр файла: {Path.GetFileNameWithoutExtension(fileName)} ");
             Console.WriteLine("══════════════════════════════════");
             for (int i = 0; i < Math.Min(lines.Length, count); i++)
             {
@@ -54,7 +63,7 @@ namespace nhtl
             Console.WriteLine("══════════════════════════════════\n");
         }
 
-        static void ShowEditMenu(string fileName, string[] lines)
+        public static void ShowEditMenu(string fileName, string[] lines)
         {
             Dictionary<ConsoleKey, Action> keyActions = new()
             {
@@ -114,12 +123,6 @@ namespace nhtl
 ██╔██╗ ██║███████║   ██║   ██║     
 ██║╚██╗██║██╔══██║   ██║   ██║     
 ██║ ╚████║██║  ██║   ██║   ███████╗
-╚═╝  ╚═══╝╚═╝  ╚═╝   ╚═╝   ╚══════╝
-                                                                  
-                                                                   
-
-
-
-";
+╚═╝  ╚═══╝╚═╝  ╚═╝   ╚═╝   ╚══════╝";
     }
 }

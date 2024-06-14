@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Spectre.Console;
+
 
 namespace nhtl
 {
     internal class CreateHandler
     {
+
         public static void CreateFile()
         {
             Console.Clear();
@@ -15,24 +18,32 @@ namespace nhtl
 
             Console.Write("Введите имя нового файла: ");
             string fileName = Console.ReadLine();
+            if (string.IsNullOrEmpty(fileName))
+            {
+                Console.WriteLine("Имя файла не может быть пустым.");
+                Program.ShowMainMenu();
+            }
 
-            Console.Clear();
-            Console.Write($"|Имя файла -> {fileName} <- Расширение файла|");
-            Console.WriteLine("\nВведите текст для записи в файл (для завершения ввода нажмите Ctrl+E):");
-            string inputText = ReadMultilineInput();
+            string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
+            string fileExtension = Path.GetExtension(fileName);
 
-            Console.WriteLine(); // Переход на новую строку после нажатия Ctrl+E
+            AnsiConsole.MarkupInterpolated($"Имя файла -> [green]{fileNameWithoutExtension}[/][red]{fileExtension}[/] <- Расширение файла\n");
+
+            TextBuffer textBuffer = new();
+            string inputText = textBuffer.StartReading();
+            //Console.WriteLine(); // Переход на новую строку после нажатия Ctrl+E
 
             string filePath;
             do
             {
                 Console.Clear();
-                Console.Write($"|Имя файла -> {fileName} <- Расширение файла|");
-                Console.Write("\nВведите путь для сохранения файла: ");
+                AnsiConsole.MarkupInterpolated($"Имя файла -> [green]{fileNameWithoutExtension}[/][red]{fileExtension}[/] <- Расширение файла\n");
+                
+                Console.Write("Проверьте правильность пути перед сохранением файла. ");
+                Console.Write("Введите путь для сохранения файла: ");
                 filePath = Console.ReadLine();
             }
-            while (!Directory.Exists(filePath)); // Проверяем существование папки
-
+            while (!Directory.Exists(filePath)); // Проверка существования папки
             string fullFilePath = Path.Combine(filePath, fileName);
 
             try
@@ -42,7 +53,7 @@ namespace nhtl
                     writer.WriteLine(inputText);
                 }
                 Console.Clear();
-                Console.WriteLine($"Файл '{fileName}' успешно сохранён по пути: {fullFilePath}");
+                AnsiConsole.MarkupInterpolated($"Файл [green]{fileName}[/] успешно сохранён по пути: [red]{fullFilePath}[/] \n");
             }
             catch (Exception ex)
             {
@@ -51,57 +62,7 @@ namespace nhtl
             Program.ShowMainMenu();
         }
 
-    private static string ReadMultilineInput()
-    {
-        string input = string.Empty;
-        bool isEditing = true;
-
-        while (isEditing)
-        {
-            ConsoleKeyInfo keyInfo = Console.ReadKey(true);
-
-            // Обработка ввода
-            switch (keyInfo.Key)
-            {
-                case ConsoleKey.E: // Ctrl+E - выход
-                    if ((keyInfo.Modifiers & ConsoleModifiers.Control) != 0)
-                    {
-                        isEditing = false;
-                        break;
-                    }
-                    else
-                    {
-                        // Добавляем символ в текст
-                        input += keyInfo.KeyChar;
-                    }
-                break;
-
-                case ConsoleKey.Backspace:
-                    if (input.Length > 0)
-                    {
-                        // Удаляем последний символ из текста
-                        input = input.Substring(0, input.Length - 1);
-                        Console.Write("\b \b"); // Удаляем символ с консоли
-                    }
-                break;
-
-                case ConsoleKey.Enter: // Enter - перейти на новую строку
-                    input += "\n";
-                    Console.WriteLine(); // Переход на новую строку в консоли
-                    break;
-
-                default: // Добавить введенный текст
-                    input += keyInfo.KeyChar;
-                    Console.Write(keyInfo.KeyChar); // Отображаем введенный символ в консоли
-                    break;
-            }
-        }
-
-        return input;
-    }
-
-
-
+    
         public static void EditFile(string fileName, string[] lines)
         {
             Console.WriteLine("╔════════════════════════════╗");
