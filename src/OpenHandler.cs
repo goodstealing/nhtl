@@ -51,12 +51,12 @@ namespace nhtl
             }
 
             // Чтение всех строк из файла
-            string[] lines = File.ReadAllLines(filePath);
+            string[] content = File.ReadAllLines(filePath);
 
             // Предварительный просмотр информации о файле (ограничен 15 строками)
-            PreviewFileInfo(filePath, lines, 15);
+            PreviewFileInfo(filePath, content, 15);
             // Показать меню редактирования для текущего файла
-            ShowEditMenu(filePath, lines);
+            ShowEditMenu(filePath);
         }
 
 
@@ -169,45 +169,37 @@ namespace nhtl
 
         /// Отображает предпросмотр содержимого файла в консоли.
         /// <param name="filePath">Путь до файла для предпросмотра.</param>
-        /// <param name="lines">Массив строк, представляющих содержимое файла.</param>
+        /// <param name="content">Массив строк, представляющих содержимое файла.</param>
         /// <param name="count">Количество строк, отображаемых из файла.</param>
-        static void PreviewFileInfo(string filePath, string[] lines, int count)
+        public static void PreviewFileInfo(string filePath, string[] content, int count)
         {
             // Очистка консоли
             Console.Clear();
 
-            // Извлечение имени файла и расширения файла
-            string fileName = System.IO.Path.GetFileNameWithoutExtension(filePath);
-            string fileExtension = System.IO.Path.GetExtension(filePath);
-
             // Отображение имени файла и расширение
-            AnsiConsole.MarkupInterpolated($"Предпросмотр файла -> [green]{fileName}[/][red]{fileExtension}[/] <- Расширение файла\n");
+            AnsiConsole.MarkupInterpolated($"Предпросмотр файла -> [green]{fileNameWithoutExtension}[/][red]{fileExtension}[/] <- Расширение файла\n");
 
             // Разделительная линия
             Console.WriteLine("══════════════════════════════════");
             // Итерация по строкам и отображение строк до указанного значения count
-            for (int i = 0; i < Math.Min(lines.Length, count); i++)
+            for (int i = 0; i < Math.Min(content.Length, count); i++)
             {
-                Console.WriteLine($"{i + 1}: {lines[i]}");
+                Console.WriteLine($"{i + 1}: {content[i]}");
             }
-            Console.WriteLine("══════════════════════════════════\n");
+            Console.WriteLine("══════════════════════════════════");
         }
 
 
         /// Отображает меню редактирования с опциями редактирования, удаления файла и выхода в главное меню.
         /// <param name="filePath">Путь до файла для предпросмотра.</param>
-        /// <param name="lines">Массив строк, представляющих содержимое файла.</param>
-        public static void ShowEditMenu(string filePath, string[] lines)
+        public static void ShowEditMenu(string filePath)
         {
-            // Исключение если массив строк равен нулю
-            ArgumentNullException.ThrowIfNull(lines);
-
             // Создание словаря для сопоставления горячих клавиш с методами
             Dictionary<ConsoleKey, Action> keyActions = new()
             {
                 { ConsoleKey.E, () => EditHandler.EditFile(filePath) }, // Редактирование файла
                 { ConsoleKey.R, () => DeleteFile(filePath) },           // Удаление файла
-                { ConsoleKey.Z, EditExit },                             // Выход в главное меню
+                { ConsoleKey.Z, EditHandler.Exit},                      // Выход в главное меню
             };
             Console.CursorVisible = false;
 
@@ -275,13 +267,6 @@ namespace nhtl
                 // Возврат в главное меню
                 Program.ShowMainMenu();
             }
-        }
-
-        // Очистка консоли перед выходом в главное меню.
-        static void EditExit() 
-        {
-            Console.Clear();
-            Program.ShowMainMenu();
         }
     }
 }

@@ -16,10 +16,15 @@ namespace nhtl
             currentColumn = 0;
         }
 
-        public string StartReading()
+        // Добавляем перегрузку метода StartReading для загрузки начального содержимого
+        public string StartReading(string initialContent)
         {
+
             Console.WriteLine("Введите текст (Ctrl+E для завершения ввода):");
+            InitializeBuffer(initialContent); // Инициализируем буфер с начальным содержимым
+
             bool isEditing = true;
+            string userInput = initialContent; // Начальное содержимое для редактирования
 
             while (isEditing)
             {
@@ -36,25 +41,42 @@ namespace nhtl
                         else
                         {
                             AddCharacter(keyInfo.KeyChar);
+                            userInput += keyInfo.KeyChar; // Добавляем символ к пользовательскому вводу
                         }
                         break;
 
                     case ConsoleKey.Backspace:
                         HandleBackspace();
+                        if (userInput.Length > 0)
+                        {
+                            userInput = userInput.Substring(0, userInput.Length - 1); // Удаляем последний символ из пользовательского ввода
+                        }
                         break;
 
                     case ConsoleKey.Enter:
                         AddNewLine();
+                        userInput += "\n"; // Добавляем символ новой строки к пользовательскому вводу
                         break;
 
                     default:
                         AddCharacter(keyInfo.KeyChar);
+                        userInput += keyInfo.KeyChar; // Добавляем символ к пользовательскому вводу
                         break;
                 }
             }
 
-            return "\"\\nВвод завершен.";
+            return userInput; // Возвращаем окончательный пользовательский ввод
         }
+
+        // Инициализация буфера с начальным содержимым
+        public void InitializeBuffer(string initialContent)
+        {
+            lines = new List<string>(initialContent.Split('\n')); // Разбиваем начальное содержимое на строки
+            currentLine = lines.Count - 1;
+            currentColumn = lines[currentLine].Length;
+            Console.Write(initialContent); // Выводим начальное содержимое в консоль
+        }
+
 
         private void AddCharacter(char c)
         {
@@ -83,7 +105,7 @@ namespace nhtl
             }
         }
 
-        private void AddNewLine()
+        public void AddNewLine()
         {
             lines.Insert(currentLine + 1, string.Empty);
             currentLine++;

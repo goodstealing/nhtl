@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 using Spectre.Console;
@@ -29,7 +30,7 @@ namespace nhtl
             AnsiConsole.MarkupInterpolated($"Имя файла -> [green]{fileNameWithoutExtension}[/][red]{fileExtension}[/] <- Расширение файла\n");
 
             TextBuffer textBuffer = new();
-            string inputText = textBuffer.StartReading();
+            string inputText = textBuffer.StartReading(string.Join(null));
 
             string filePath;
             do
