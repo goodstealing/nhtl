@@ -5,34 +5,50 @@ namespace nhtl
 {
     public class TextBuffer
     {
-        private List<string> lines;
+        // Лист для контента
+        private List<string> content;
+
+        // Индекс текущей строки
         private int currentLine;
+        // Индекс текущей колонки
         private int currentColumn;
 
+        // Конструктор инициализирует буфер текста пустой строкой и устанавливает начальные индексы
         public TextBuffer()
         {
-            lines = new List<string> { string.Empty };
+            content = [string.Empty];
             currentLine = 0;
             currentColumn = 0;
         }
 
-        // Добавляем перегрузку метода StartReading для загрузки начального содержимого
+
+        /// Метод обработки ввода теста с сохранением текста в буфер и возможностью загрузки начального содержимого.
+        /// <param name="initialContent">Контент который будет инициализирован.</param>
+        /// <returns>StartReading(string.content).</returns>
         public string StartReading(string initialContent)
         {
-
+            Console.CursorVisible = true;
             Console.WriteLine("Введите текст (Ctrl+E для завершения ввода):");
-            InitializeBuffer(initialContent); // Инициализируем буфер с начальным содержимым
 
+            // Инициализация буфера с начальным содержимым
+            InitializeBuffer(initialContent);
+
+            // Переменная для отслеживания состояния редактирования
             bool isEditing = true;
-            string userInput = initialContent; // Начальное содержимое для редактирования
+            // Переменная для хранения пользовательского ввода
+            string userInput = initialContent;
 
+            // Цикл обработки ввода пользователя
             while (isEditing)
             {
+                // Чтение нажатия клавиши
                 ConsoleKeyInfo keyInfo = Console.ReadKey(true);
 
+                // Обработка клавиш
                 switch (keyInfo.Key)
                 {
                     case ConsoleKey.E:
+                        // Обработка Ctrl+E для завершения редактирования
                         if ((keyInfo.Modifiers & ConsoleModifiers.Control) != 0)
                         {
                             isEditing = false;
@@ -40,82 +56,112 @@ namespace nhtl
                         }
                         else
                         {
+                            // Добавление символа к буферу и пользовательскому вводу
                             AddCharacter(keyInfo.KeyChar);
-                            userInput += keyInfo.KeyChar; // Добавляем символ к пользовательскому вводу
+                            userInput += keyInfo.KeyChar;
                         }
                         break;
 
                     case ConsoleKey.Backspace:
+                        // Обработка нажатия клавиши Backspace
                         HandleBackspace();
                         if (userInput.Length > 0)
                         {
-                            userInput = userInput.Substring(0, userInput.Length - 1); // Удаляем последний символ из пользовательского ввода
+                            // Удаление последнего символа из пользовательского ввода
+                            userInput = userInput.Substring(0, userInput.Length - 1);
                         }
                         break;
 
                     case ConsoleKey.Enter:
+                        // Обработка нажатия клавиши Enter
                         AddNewLine();
-                        userInput += "\n"; // Добавляем символ новой строки к пользовательскому вводу
+                        userInput += "\n"; // Добавление символа новой строки к пользовательскому вводу
                         break;
 
                     default:
+                        // Добавление символа к буферу и пользовательскому вводу
                         AddCharacter(keyInfo.KeyChar);
-                        userInput += keyInfo.KeyChar; // Добавляем символ к пользовательскому вводу
+                        userInput += keyInfo.KeyChar;
                         break;
                 }
             }
 
-            return userInput; // Возвращаем окончательный пользовательский ввод
+            // Возврат введённого текста
+            Console.CursorVisible = false;
+            return userInput;
         }
 
-        // Инициализация буфера с начальным содержимым
+        
+        /// Метод инициализирует буфер строк начальным содержимым
+        /// <param name="initialContent">Контент который будет инициализирован.</param>
         public void InitializeBuffer(string initialContent)
         {
-            lines = new List<string>(initialContent.Split('\n')); // Разбиваем начальное содержимое на строки
-            currentLine = lines.Count - 1;
-            currentColumn = lines[currentLine].Length;
-            Console.Write(initialContent); // Выводим начальное содержимое в консоль
+            // Разбитие initialContent на строки и сохранение в буфер
+            content = new List<string>(initialContent.Split('\n'));
+            // Текущая строка и колонка = последняя строка и её длина
+            currentLine = content.Count - 1;
+            currentColumn = content[currentLine].Length;
+            Console.Write(initialContent);
         }
 
 
+        /// Метод добавляет символ в текущую позицию буфера
+        /// <param name="c">Символ для обработки ввода.</param>
         private void AddCharacter(char c)
         {
-            lines[currentLine] = lines[currentLine].Insert(currentColumn, c.ToString());
+            // Вставка символа в текущую строку в позиции текущей колонки
+            content[currentLine] = content[currentLine].Insert(currentColumn, c.ToString());
+            // Увеличение индекса текущей колонки
             currentColumn++;
+            // Вывод символа
             Console.Write(c);
         }
 
+
+        /// Обрабатывает удаление символов, переход на новую строку.
         private void HandleBackspace()
         {
+            // Если не в начале строки, удаление символа слева от текущей Column
             if (currentColumn > 0)
             {
-                lines[currentLine] = lines[currentLine].Remove(currentColumn - 1, 1);
+                content[currentLine] = content[currentLine].Remove(currentColumn - 1, 1);
                 currentColumn--;
+                // Удаление символа в консоли
                 Console.Write("\b \b");
             }
             else if (currentLine > 0)
             {
-                currentColumn = lines[currentLine - 1].Length;
+                // Переход на предыдущую строку и объединение её с текущей
+                currentColumn = content[currentLine - 1].Length;
                 Console.CursorLeft = 0;
                 Console.CursorTop--;
-                Console.Write(lines[currentLine - 1]);
-                lines[currentLine - 1] += lines[currentLine];
-                lines.RemoveAt(currentLine);
+                Console.Write(content[currentLine - 1]);
+                content[currentLine - 1] += content[currentLine];
+                content.RemoveAt(currentLine);
                 currentLine--;
             }
         }
 
+
+        /// Добавление новой строки в буфер
         public void AddNewLine()
         {
-            lines.Insert(currentLine + 1, string.Empty);
+            // Вставка пустой строки после текущей строки
+            content.Insert(currentLine + 1, string.Empty);
+            // Переход к новой строке и  currentColumn = 0
             currentLine++;
             currentColumn = 0;
+            // Вывод новой строки в консоль
             Console.WriteLine();
         }
 
+
+        /// Возвращает контента буфера.
+        /// <returns>Содержимое буфера в виде одной строки.</returns>
         public string GetBufferContent()
         {
-            return string.Join("\n", lines);
+            // Объединение строк буфера в одну строку с разделителем "\n"
+            return string.Join("\n", content);
         }
     }
 }

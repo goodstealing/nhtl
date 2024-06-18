@@ -15,8 +15,8 @@ namespace nhtl
         {
             Dictionary<ConsoleKey, Action> keyActions = new()
             {
-                { ConsoleKey.O, OpenHandler.OpenFile },
-                { ConsoleKey.N, CreateHandler.CreateFile },
+                { ConsoleKey.O,       OpenHandler.OpenFile },
+                { ConsoleKey.N, () => CreateHandler.CreateFile().Wait() },
             };
 
 
@@ -45,7 +45,7 @@ namespace nhtl
                             OpenHandler.OpenFile();
                             break;
                         case ConsoleKey.N:
-                            CreateHandler.CreateFile();
+                            Task task = CreateHandler.CreateFile();
                             break;
                         default:
                             break; // Обработка неизвестных клавиш Ctrl

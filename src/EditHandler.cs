@@ -43,7 +43,7 @@ namespace nhtl
             File.WriteAllText(filePath, inputText);
             Console.Clear();
 
-            Console.WriteLine($"Файл {fileNameWithoutExtension}{fileExtension} успешно сохранён.");
+            AnsiConsole.MarkupInterpolated($"Файл [green]{fileNameWithoutExtension}[/][red]{fileExtension}[/] успешно сохранён.\n");
             OpenHandler.ShowEditMenu(filePath);
         }
 
