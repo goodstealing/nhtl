@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata;
-using System.Text;
+using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Spectre.Console;
-
 
 namespace nhtl
 {
@@ -17,12 +14,9 @@ namespace nhtl
         // Расширение файла
         public static string? fileExtension;
 
-        /// <summary>
         /// Асинхронно создает новый файл с заданным именем и содержимым.
-        /// </summary>
         public static async Task CreateFile()
         {
-            // Очистка консоли и отображение курсора
             Console.Clear();
             Console.CursorVisible = true;
 
@@ -38,13 +32,11 @@ namespace nhtl
 
                 if (string.IsNullOrEmpty(fileName))
                 {
-                    // Вывод сообщения о пустом имени файла
                     Console.Clear();
                     AnsiConsole.MarkupInterpolated($"LOG: [yellow]Имя файла не может быть пустым. Попробуйте снова.[/]\n");
                 }
                 else if (!fileNameRegex.IsMatch(fileName))
                 {
-                    // Вывод сообщения о некорректном формате имени файла
                     Console.Clear();
                     AnsiConsole.MarkupInterpolated($"LOG: [yellow]Неверный формат имени файла. Попробуйте снова.[/]\n");
                     fileName = null;
@@ -87,7 +79,7 @@ namespace nhtl
             try
             {
                 // Запись текста в новый файл
-                using (StreamWriter writer = new(filePath))
+                using (StreamWriter writer = new(fullFilePath))
                 {
                     await writer.WriteLineAsync(inputText);
                 }
@@ -121,7 +113,6 @@ namespace nhtl
             }
         }
 
-        
         /// Асинхронно обрабатывает исключения, выводит сообщение об ошибке и воспроизводит звук ошибки.
         /// <param name="message">Сообщение об ошибке</param>
         /// <param name="soundPath">Путь к звуковому файлу</param>
@@ -134,9 +125,7 @@ namespace nhtl
             await OpenHandler.PlayErrorSoundAsync(soundPath);
         }
 
-
-
-        static void SaveFile(string fileName, string[] lines)
+        private static void SaveFile(string fileName, string[] lines)
         {
             File.WriteAllLines(fileName, lines);
             Console.WriteLine($"Файл '{fileName}' сохранен.");

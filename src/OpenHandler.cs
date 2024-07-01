@@ -37,7 +37,7 @@ namespace nhtl
             // Получение имени файла без расширения и расширения файла
             fileNameWithoutExtension = Path.GetFileNameWithoutExtension(filePath);
             fileExtension = Path.GetExtension(filePath);
-
+                
             // Проверка существования файла по указанному пути
             if (!File.Exists(filePath))
             {
@@ -247,6 +247,9 @@ namespace nhtl
                     // Удаление файла при условии что он существует
                     File.Delete(filePath);
                     AnsiConsole.MarkupInterpolated($"LOG: Файл [green]{fileNameWithoutExtension}[/] успешно удалён по пути: [red]{filePath}[/].\n");
+
+                    // Возврат в главное меню
+                    Program.ShowMainMenu();
                 }
                 else
                 {

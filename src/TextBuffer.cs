@@ -16,15 +16,14 @@ namespace nhtl
         // Конструктор инициализирует буфер текста пустой строкой и устанавливает начальные индексы
         public TextBuffer()
         {
-            content = [string.Empty];
+            content = new List<string> { string.Empty };
             currentLine = 0;
             currentColumn = 0;
         }
 
-
-        /// Метод обработки ввода теста с сохранением текста в буфер и возможностью загрузки начального содержимого.
+        /// Метод обработки ввода текста с сохранением текста в буфер и возможностью загрузки начального содержимого.
         /// <param name="initialContent">Контент который будет инициализирован.</param>
-        /// <returns>StartReading(string.content).</returns>
+        /// <returns>StartReading(string content).</returns>
         public string StartReading(string initialContent)
         {
             Console.CursorVisible = true;
@@ -78,6 +77,16 @@ namespace nhtl
                         userInput += "\n"; // Добавление символа новой строки к пользовательскому вводу
                         break;
 
+                    case ConsoleKey.LeftArrow:
+                        // Обработка нажатия клавиши LeftArrow
+                        MoveCursorLeft();
+                        break;
+
+                    case ConsoleKey.RightArrow:
+                        // Обработка нажатия клавиши RightArrow
+                        MoveCursorRight();
+                        break;
+
                     default:
                         // Добавление символа к буферу и пользовательскому вводу
                         AddCharacter(keyInfo.KeyChar);
@@ -91,7 +100,6 @@ namespace nhtl
             return userInput;
         }
 
-        
         /// Метод инициализирует буфер строк начальным содержимым
         /// <param name="initialContent">Контент который будет инициализирован.</param>
         public void InitializeBuffer(string initialContent)
@@ -104,7 +112,6 @@ namespace nhtl
             Console.Write(initialContent);
         }
 
-
         /// Метод добавляет символ в текущую позицию буфера
         /// <param name="c">Символ для обработки ввода.</param>
         private void AddCharacter(char c)
@@ -116,7 +123,6 @@ namespace nhtl
             // Вывод символа
             Console.Write(c);
         }
-
 
         /// Обрабатывает удаление символов, переход на новую строку.
         private void HandleBackspace()
@@ -142,19 +148,49 @@ namespace nhtl
             }
         }
 
-
         /// Добавление новой строки в буфер
         public void AddNewLine()
         {
             // Вставка пустой строки после текущей строки
             content.Insert(currentLine + 1, string.Empty);
-            // Переход к новой строке и  currentColumn = 0
+            // Переход к новой строке и  currentColumn = 0 
             currentLine++;
             currentColumn = 0;
             // Вывод новой строки в консоль
             Console.WriteLine();
         }
 
+        /// Перемещение курсора влево
+        private void MoveCursorLeft()
+        {
+            if (currentColumn > 0)
+            {
+                currentColumn--;
+                Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
+            }
+            else if (currentLine > 0)
+            {
+                currentLine--;
+                currentColumn = content[currentLine].Length;
+                Console.SetCursorPosition(content[currentLine].Length, Console.CursorTop - 1);
+            }
+        }
+
+        /// Перемещение курсора вправо
+        private void MoveCursorRight()
+        {
+            if (currentColumn < content[currentLine].Length)
+            {
+                currentColumn++;
+                Console.SetCursorPosition(Console.CursorLeft + 1, Console.CursorTop);
+            }
+            else if (currentLine < content.Count - 1)
+            {
+                currentLine++;
+                currentColumn = 0;
+                Console.SetCursorPosition(0, Console.CursorTop + 1);
+            }
+        }
 
         /// Возвращает контента буфера.
         /// <returns>Содержимое буфера в виде одной строки.</returns>
